@@ -14,6 +14,7 @@ private:
 
     bool surge_control_mode,sway_control_mode,heave_control_mode;
     bool yaw_control_mode,pitch_control_mode,roll_control_mode;
+    bool test_mode;
 
     PIDController surge_controller,sway_controller,heave_controller;
     PIDController yaw_controller, pitch_controller,roll_controller;
@@ -35,6 +36,13 @@ public:
     void setYawControlMode(bool mode);
     void setPitchControlMode(bool mode);
     void setRollControlMode(bool mode);
+
+    // Functions to enter/exit test mode
+    void enableTestMode();
+    void disableTestMode();
+
+    // Functions to test each thruster
+    void testThruster(int thruster_number, float speed);
      
 
     //Functions to adjust PID  constants for each DoF
