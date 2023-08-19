@@ -8,6 +8,8 @@ ThrusteredVehicleMotionController::ThrusteredVehicleMotionController(/* args */)
 
     ThrustersController::init();
 
+    test_mode = 0;
+
     surge_control_mode = OPEN_LOOP_MODE;
     surge_controller.setConstants(1, 1, 1, 0.001);
     surge_controller.setMinMaxLimits(-100, 100, -50, 50);
@@ -419,13 +421,19 @@ void ThrusteredVehicleMotionController::refresh(){
 
  void ThrusteredVehicleMotionController::updateThrustValues(){
 
-    for (int i = 0; i < number_of_thrusters; i++)
-    {
-        thrust_vector[i] = (surge_thrust*surge_vector[i]) + (sway_thrust*sway_vector[i]) + (heave_thrust*heave_vector[i]) + (yaw_thrust*yaw_vector[i]) +  (pitch_thrust*pitch_vector[i]) + (roll_thrust*roll_vector[i]);
-        thrust_vector[i] = limitToRange(thrust_vector[i],min_thrust,max_thrust);
+    if(test_mode == 0){
+        for (int i = 0; i < number_of_thrusters; i++)
+        {
+            thrust_vector[i] = (surge_thrust*surge_vector[i]) + (sway_thrust*sway_vector[i]) + (heave_thrust*heave_vector[i]) + (yaw_thrust*yaw_vector[i]) +  (pitch_thrust*pitch_vector[i]) + (roll_thrust*roll_vector[i]);
+            thrust_vector[i] = limitToRange(thrust_vector[i],min_thrust,max_thrust);
+        }
+        float* thrust_array = &thrust_vector[0];
+        ThrustersController::writeThrusterValues(thrust_array);
     }
-    float* thrust_array = &thrust_vector[0];
-    ThrustersController::writeThrusterValues(thrust_array);
+    else{
+        float *thrust_array = &thrust_vector[0];
+        ThrustersController::writeThrusterValues(thrust_array);
+    }
  }
 
 
@@ -446,3 +454,28 @@ float ThrusteredVehicleMotionController::limitToRange(float value, float minimum
     
     
 }
+
+void ThrusteredVehicleMotionController::testThruster(int thruster_number, float speed){
+    if((thruster_number >= 1) && (thruster_number  <= number_of_thrusters)){
+        for (int i = 0; i < number_of_thrusters; i++){
+            if(i == (thruster_number - 1)){
+                thrust_vector[i] = speed;
+                thrust_vector[i] = limitToRange(thrust_vector[i], min_thrust, max_thrust);
+            }
+            else{
+                thrust_vector[i] = 0;
+            }
+        }
+    }
+    
+}
+
+void ThrusteredVehicleMotionController::enableTestMode(){
+    test_mode = 1;
+}
+
+void ThrusteredVehicleMotionController::disableTestMode(){
+    test_mode = 0;
+}
+
+
